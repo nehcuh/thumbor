@@ -53,8 +53,17 @@ impl super::Engine for Photon {
 
 impl super::SpecTransform<&crate::pb::abi::Crop> for Photon {
     fn transform(&mut self, op: &crate::pb::abi::Crop) {
-        let width = op.x2 - op.x1;
-        let height = op.y2 - op.y1;
+        let x1 = op.x1.min(self.0.width());
+        let y1 = op.y1.min(self.0.height());
+        let x2 = op.x2.min(self.0.width());
+        let y2 = op.y2.min(self.0.height());
+
+        // Make sure x2 > x1 and y2 > y1
+        if x2 <= x1 || y2 <= y1 {
+            return; // Invalid crop dimensions - do nothing
+        }
+        let width = x2 - x1;
+        let height = y2 - y1;
         let cropped_img = image::imageops::crop_imm(&self.0, op.x1, op.y1, width, height);
         self.0 = DynamicImage::ImageRgba8(cropped_img.to_image());
     }

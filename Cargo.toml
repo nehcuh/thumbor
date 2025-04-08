@@ -5,7 +5,7 @@ edition = "2024"
 
 [dependencies]
 anyhow = "1.0.97"
-axum = "0.8.3"
+axum = { version = "0.8.3", features = ["macros"] }
 base64 = "0.22.1"
 bytes = "1.10.1"
 image = { version = "0.25.6", features = ["jpeg", "png"] }
