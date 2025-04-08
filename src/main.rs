@@ -75,11 +75,13 @@ async fn generate(
 
     engine.apply(&spec.specs);
 
-    let image = engine.generate(image::ImageFormat::Jpeg);
+    // let image = engine.generate(image::ImageFormat::Jpeg);
+    let image = engine.generate(image::ImageFormat::Png);
     info!("Finished processing: image size {}", image.len());
 
     let mut headers = HeaderMap::new();
-    headers.insert("CONTENT-TYPE", HeaderValue::from_static("image/jpeg"));
+    // headers.insert("CONTENT-TYPE", HeaderValue::from_static("image/jpeg"));
+    headers.insert("CONTENT-TYPE", HeaderValue::from_static("image/png"));
 
     Ok((headers, image))
 }
@@ -108,20 +110,4 @@ async fn retrieve_image(url: &str, cache: Cache) -> AnyResult<Bytes> {
     guard.put(key, data.clone());
 
     Ok(data)
-
-    // let mut g = cache.lock().unwrap();
-    // let data = match g.get(&key) {
-    //     Some(v) => {
-    //         info!("Match cached {}", key);
-    //         v.to_owned()
-    //     }
-    //     None => {
-    //         info!("Retrieve url");
-    //         let resp = reqwest::get(url).await?;
-    //         let data = resp.bytes().await?;
-    //         g.put(key, data.clone());
-    //         data
-    //     }
-    // };
-    // Ok(data)
 }

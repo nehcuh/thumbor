@@ -85,7 +85,7 @@ impl abi::Spec {
                 width,
                 height,
                 rtype: abi::resize::ResizeType::SeamCarve as i32,
-                filter: abi::resize::SampleFilter::Undefined as i32,
+                filter: abi::resize::SampleFilter::Nereast as i32,
             })),
         }
     }
@@ -123,10 +123,18 @@ mod tests {
 
     #[test]
     fn test_encoded_spec_could_be_decoded() {
-        let spec1 = abi::Spec::new_resize(600, 600, abi::resize::SampleFilter::CatmullRom);
+        // let spec1 = abi::Spec::new_resize(600, 600, abi::resize::SampleFilter::CatmullRom);
+        let spec1 = abi::Spec::new_resize_seam_carve(600, 600);
         let spec2 = abi::Spec::new_filter(abi::filter::Filter::Marine);
-        let image_spec = abi::ImageSpec::new(vec![spec1, spec2]);
+        let spec3 = abi::Spec {
+            data: Some(abi::spec::Data::Contrast(abi::Contrast { contrast: 0.2 })),
+        };
+        let image_spec = abi::ImageSpec::new(vec![spec1, spec2, spec3]);
         let s: String = image_spec.borrow().into();
+        println!(
+            "origin specs: [resize, filter, contrast], encoded url: {}",
+            s
+        );
         assert_eq!(image_spec, s.as_str().try_into().unwrap())
     }
 }
