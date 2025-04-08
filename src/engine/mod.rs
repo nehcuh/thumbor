@@ -1,11 +1,9 @@
 use image::ImageFormat;
 
-use crate::pb::abi::Spec;
-
 pub(crate) mod image_engine;
 
 pub trait Engine {
-    fn apply(&mut self, specs: &[Spec]);
+    fn apply(&mut self, specs: &[crate::pb::abi::Spec]);
     fn generate(self, format: ImageFormat) -> Vec<u8>;
 }
 
