@@ -2,7 +2,7 @@ use std::io::Cursor;
 
 use anyhow::Result as AnyResult;
 use bytes::Bytes;
-use image::{DynamicImage, ImageFormat, RgbaImage};
+use image::{DynamicImage, ImageFormat};
 use imageproc::drawing::Canvas;
 use lazy_static::lazy_static;
 
@@ -99,12 +99,8 @@ impl super::SpecTransform<&crate::pb::abi::Resize> for Photon {
             }
             crate::pb::abi::resize::ResizeType::SeamCarve => {
                 // original from photon_rs: https://docs.rs/photon-rs/0.3.2/src/photon_rs/transform.rs.html#296-326
-                tracing::debug!("trying to do seam carve on image");
-                // let mut img: RgbaImage = self.0.to_rgba8();
                 let (w, h) = self.0.dimensions();
-                // let (w, h) = img.dimensions();
                 let (diff_w, diff_h) = (w - w.min(op.width), h - h.min(op.height));
-                tracing::debug!("cal diff");
 
                 for _ in 0..diff_w {
                     let vec_steam =
@@ -115,7 +111,6 @@ impl super::SpecTransform<&crate::pb::abi::Resize> for Photon {
                     )
                     .into();
                 }
-                tracing::debug!("vertically finished");
                 if diff_h.ne(&0_u32) {
                     self.0 = image::imageops::rotate90(&self.0.to_rgba8()).into();
                     for _ in 0..diff_h {
@@ -129,8 +124,6 @@ impl super::SpecTransform<&crate::pb::abi::Resize> for Photon {
                     }
                     self.0 = image::imageops::rotate270(&self.0.to_rgba8()).into();
                 }
-                tracing::debug!("horizon finished");
-                // self.0 = image::DynamicImage::ImageRgba8(img)
             }
         }
     }
