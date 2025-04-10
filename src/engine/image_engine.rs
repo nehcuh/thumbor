@@ -7,7 +7,7 @@ use imageproc::drawing::Canvas;
 use lazy_static::lazy_static;
 
 use super::SpecTransform;
-pub struct Photon(DynamicImage);
+pub struct ImageEngine(DynamicImage);
 
 lazy_static! {
     static ref WATERMARK: DynamicImage = {
@@ -17,16 +17,16 @@ lazy_static! {
     };
 }
 
-impl TryFrom<Bytes> for Photon {
+impl TryFrom<Bytes> for ImageEngine {
     type Error = anyhow::Error;
 
     fn try_from(value: Bytes) -> AnyResult<Self> {
         let img = image::load_from_memory(value.as_ref())?;
-        Ok(Photon(img))
+        Ok(ImageEngine(img))
     }
 }
 
-impl super::Engine for Photon {
+impl super::Engine for ImageEngine {
     fn apply(&mut self, specs: &[crate::pb::abi::Spec]) {
         for spec in specs.iter() {
             match spec.data {
@@ -60,7 +60,7 @@ impl super::Engine for Photon {
     }
 }
 
-impl super::SpecTransform<&crate::pb::abi::Crop> for Photon {
+impl super::SpecTransform<&crate::pb::abi::Crop> for ImageEngine {
     fn transform(&mut self, op: &crate::pb::abi::Crop) {
         let x1 = op.x1.min(self.0.width());
         let y1 = op.y1.min(self.0.height());
@@ -78,13 +78,13 @@ impl super::SpecTransform<&crate::pb::abi::Crop> for Photon {
     }
 }
 
-impl super::SpecTransform<&crate::pb::abi::Contrast> for Photon {
+impl super::SpecTransform<&crate::pb::abi::Contrast> for ImageEngine {
     fn transform(&mut self, op: &crate::pb::abi::Contrast) {
         self.0 = image::DynamicImage::ImageRgba8(image::imageops::contrast(&self.0, op.contrast));
     }
 }
 
-impl super::SpecTransform<&crate::pb::abi::Resize> for Photon {
+impl super::SpecTransform<&crate::pb::abi::Resize> for ImageEngine {
     fn transform(&mut self, op: &crate::pb::abi::Resize) {
         match crate::pb::abi::resize::ResizeType::try_from(op.rtype).unwrap() {
             crate::pb::abi::resize::ResizeType::Normal => {
@@ -129,26 +129,26 @@ impl super::SpecTransform<&crate::pb::abi::Resize> for Photon {
     }
 }
 
-impl super::SpecTransform<&crate::pb::abi::Filter> for Photon {
+impl super::SpecTransform<&crate::pb::abi::Filter> for ImageEngine {
     fn transform(&mut self, op: &crate::pb::abi::Filter) {
         let filter_type = crate::pb::abi::filter::Filter::try_from(op.filter).unwrap();
         filter_type.apply(&mut self.0);
     }
 }
 
-impl SpecTransform<&crate::pb::abi::Fliph> for Photon {
+impl SpecTransform<&crate::pb::abi::Fliph> for ImageEngine {
     fn transform(&mut self, _op: &crate::pb::abi::Fliph) {
         image::imageops::flip_horizontal_in_place(&mut self.0);
     }
 }
 
-impl SpecTransform<&crate::pb::abi::Flipv> for Photon {
+impl SpecTransform<&crate::pb::abi::Flipv> for ImageEngine {
     fn transform(&mut self, _op: &crate::pb::abi::Flipv) {
         image::imageops::flip_vertical_in_place(&mut self.0);
     }
 }
 
-impl SpecTransform<&crate::pb::abi::Watermark> for Photon {
+impl SpecTransform<&crate::pb::abi::Watermark> for ImageEngine {
     fn transform(&mut self, op: &crate::pb::abi::Watermark) {
         image::imageops::overlay(&mut self.0, &*WATERMARK, op.x as i64, op.y as i64);
     }

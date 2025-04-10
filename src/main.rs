@@ -69,7 +69,7 @@ async fn generate(
         .await
         .map_err(|_| StatusCode::BAD_REQUEST)?;
 
-    let mut engine: crate::engine::image_engine::Photon = data
+    let mut engine: crate::engine::image_engine::ImageEngine = data
         .try_into()
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
